@@ -65,53 +65,55 @@ void decrVol() {
 
 }
 void key_callback(int key) {
-	if (is_end == false) {
-		switch (key) {
-		case KEY_NOTHING:
-			break;
-		case KEY_ESC:
-			exit(1);
-		case KEY_SPACE:
-			if (running) { 
-				sound.pause(); 
-				sound.setPlayingOffset(sf::milliseconds(sound.getPlayingOffset().asMilliseconds() - cap->get(CAP_PROP_POS_MSEC)));
-			}
-			else {
-				sound.setPlayingOffset(sf::milliseconds(sound.getPlayingOffset().asMilliseconds() - cap->get(CAP_PROP_POS_MSEC)));
-				sound.play();
-			}
-			running = !running;
-			break;
-		case KEY_A:
-			rewind_sec = true;
-			break;
-		case KEY_D:
-			rewind_forward_sec = true;
-			break;
-		case KEY_W:
-			incrVol();
-			sound.setVolume(volume);
-			break;
-		case KEY_S:
-			decrVol();
-			sound.setVolume(volume);
-			break;
-		default:
+	if(key != -1)
+		if (is_end == false) {
 			std::cout << key << std::endl;
-			//rewind_sec = true;
+			switch (key) {
+			case KEY_NOTHING:
+				break;
+			case KEY_ESC:
+				exit(1);
+			case KEY_SPACE:
+				if (running) { 
+					sound.pause(); 
+					sound.setPlayingOffset(sf::milliseconds(sound.getPlayingOffset().asMilliseconds() - cap->get(CAP_PROP_POS_MSEC)));
+				}
+				else {
+					sound.setPlayingOffset(sf::milliseconds(sound.getPlayingOffset().asMilliseconds() - cap->get(CAP_PROP_POS_MSEC)));
+					sound.play();
+				}
+				running = !running;
+				break;
+			case KEY_A:
+				rewind_sec = true;
+				break;
+			case KEY_D:
+				rewind_forward_sec = true;
+				break;
+			case KEY_W:
+				incrVol();
+				sound.setVolume(volume);
+				break;
+			case KEY_S:
+				decrVol();
+				sound.setVolume(volume);
+				break;
+			default:
+				std::cout << key << std::endl;
+				//rewind_sec = true;
+			}
 		}
-	}
-	else { // video ended
-		switch (key) {
-		case KEY_ENTER:
-			is_end = false;
-			reset_video = true;
-			break;
-		default:
-			exit(1);
-		}
+		else { // video ended
+			switch (key) {
+			case KEY_ENTER:
+				is_end = false;
+				reset_video = true;
+				break;
+			default:
+				exit(1);
+			}
 
-	}
+		}
 }
 int main()
 {
@@ -159,30 +161,39 @@ int main()
 	
 	sound.setBuffer(buffer);
 	sound.setPitch(1.1f); // audio speed
+	sound.setVolume(volume);
 	sound.play();
+	int frame_cnt = 0;
 	while (1)
 	{
-		
+		frame_cnt++;
 		Mat frame;
 		// Mat object is a basic image container. frame is an object of Mat.
 		
 		if (running == true) {
 			// sync video with audio
-			sound.setPlayingOffset(sf::milliseconds(sound.getPlayingOffset().asMilliseconds() - cap->get(CAP_PROP_POS_MSEC)));
+			if (frame_cnt%10==0) {
+				sound.setPlayingOffset(sf::milliseconds(cap->get(CAP_PROP_POS_MSEC)));
+			}
 
 			if (rewind_sec == true) {
 				int current_msec = cap->get(CAP_PROP_POS_MSEC);
 				cap->set(CAP_PROP_POS_MSEC, current_msec - 1000* REWIND_TIME_RATE);
+				sound.setPlayingOffset(sf::milliseconds(cap->get(CAP_PROP_POS_MSEC)));
 				//cap->set(CAP_PROP_POS_FRAMES, frame_cnt);
 				rewind_sec = false;
 			}
 			else if (rewind_forward_sec == true) {
 				int current_msec = cap->get(CAP_PROP_POS_MSEC);
 				cap->set(CAP_PROP_POS_MSEC, current_msec + 1000 * REWIND_TIME_RATE);
+				sound.setPlayingOffset(sf::milliseconds(cap->get(CAP_PROP_POS_MSEC)));
+
 				rewind_forward_sec = false;
 			}
 			else if (reset_video == true) {
 				cap->set(CAP_PROP_POS_FRAMES, 0);
+				sound.resetBuffer();
+				sound.play();
 				reset_video = false;
 			}
 			else {
