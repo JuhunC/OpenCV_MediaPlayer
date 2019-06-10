@@ -41,8 +41,8 @@ int main()
 	thread ed_thr(runEyeDetection);
 
 	int total_time; // in milliseconds
-	std::string file_loc = "./sherlock.3x00.Many_Happy_Returns.mp4";
-	//std::string file_loc = "KakaoTalk_Video_20190513_2045_46_804.mp4";
+	//std::string file_loc = "./sherlock.3x00.Many_Happy_Returns.mp4";
+	std::string file_loc = "KakaoTalk_Video_20190513_2045_46_804.mp4";
 	cap = new VideoCapture(file_loc);
 
 	cap->set(CAP_PROP_POS_AVI_RATIO, 1);
